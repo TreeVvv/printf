@@ -18,7 +18,7 @@ If the program runs successfully, the **return value** is the amount of chars pr
 ## Authors
 Raymond Enokela <raydiamond316@gmail.com>
 
-IMANE BAZZI <@gmail.com>
+IMANE BAZZI <Bazziimane0@gmail.com>
 
 ------------
 
