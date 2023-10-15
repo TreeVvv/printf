@@ -1,51 +1,59 @@
-#include "main.h"
+#include <stdio.h>
+#include <stdarg.h>
 
-/**
- * _printf - formatted output conversion and print data.
- * @format: input string.
- *
- * Return: number of chars printed.
- */
-int _printf(const char *format, ...)
-{
-	unsigned int i = 0, len = 0, ibuf = 0;
-	va_list arguments;
-	int (*function)(va_list, char *, unsigned int);
-	char *buffer;
+int _printf(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    int count = 0;  // Initialize character count to zero
 
-	va_start(arguments, format), buffer = malloc(sizeof(char) * 1024);
-	if (!format || !buffer || (format[i] == '%' && !format[i + 1]))
-		return (-1);
-	if (!format[i])
-		return (0);
-	for (i = 0; format && format[i]; i++)
-	{
-		if (format[i] == '%')
-		{
-			if (format[i + 1] == '\0')
-			{	print_buf(buffer, ibuf), free(buffer), va_end(arguments);
-				return (-1);
-			}
-			else
-			{	function = get_print_func(format, i + 1);
-				if (function == NULL)
-				{
-					if (format[i + 1] == ' ' && !format[i + 2])
-						return (-1);
-					handl_buf(buffer, format[i], ibuf), len++, i--;
-				}
-				else
-				{
-					len += function(arguments, buffer, ibuf);
-					i += ev_print_func(format, i + 1);
-				}
-			} i++;
-		}
-		else
-			handl_buf(buffer, format[i], ibuf), len++;
-		for (ibuf = len; ibuf > 1024; ibuf -= 1024)
-			;
-	}
-	print_buf(buffer, ibuf), free(buffer), va_end(arguments);
-	return (len);
+    while (*format != '\0') {
+        if (*format == '%') {
+            format++;  // Move past '%'
+
+            if (*format == '\0') {
+                break;  // Reached the end of the format string
+            }
+
+            if (*format == 'c') {
+                int c = va_arg(args, int);
+                putchar(c);
+                count++;
+            } else if (*format == 's') {
+                const char *s = va_arg(args, const char *);
+                if (s == NULL) {
+                    s = "(null)";
+                }
+                while (*s != '\0') {
+                    putchar(*s);
+                    s++;
+                    count++;
+                }
+            } else if (*format == 'd' || *format == 'i') {
+                int num = va_arg(args, int);
+                printf("%d", num);
+                count++;
+            } else if (*format == '%') {
+                putchar('%');
+                count++;
+            } else {
+                // Unsupported format specifier, just print it as is
+                putchar('%');
+                putchar(*format);
+                count += 2;
+            }
+        } else {
+            putchar(*format);
+            count++;
+        }
+        format++;
+    }
+
+    va_end(args);
+    return count;
+}
+
+int main() {
+    int n = _printf("Hello, %s! The answer is %d.\n", "world", 42);
+    printf("Character count: %d\n", n);
+    return 0;
 }
