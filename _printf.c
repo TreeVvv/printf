@@ -1,59 +1,66 @@
-#include <stdio.h>
-#include <stdarg.h>
+#include "main.h"
 
-int _printf(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    int count = 0;  // Initialize character count to zero
+void print_buffer(char buffer[], int *buff_ind);
 
-    while (*format != '\0') {
-        if (*format == '%') {
-            format++;  // Move past '%'
+/**
+ * _printf - Printf function is the code i am working on.
+ * @format: format fonction is needed in codes below.
+ * Return: Printed chars is using for character.
+ */
+int _printf(const char *format, ...)
+{
+	int h, printed = 0, printed_chars = 0;
+	int flags, width, precision, size, buff_ind = 0;
+	va_list list;
+	char buffer[BUFF_SIZE];
 
-            if (*format == '\0') {
-                break;  // Reached the end of the format string
-            }
+	if (format == NULL)
+		return (-1);
 
-            if (*format == 'c') {
-                int c = va_arg(args, int);
-                putchar(c);
-                count++;
-            } else if (*format == 's') {
-                const char *s = va_arg(args, const char *);
-                if (s == NULL) {
-                    s = "(null)";
-                }
-                while (*s != '\0') {
-                    putchar(*s);
-                    s++;
-                    count++;
-                }
-            } else if (*format == 'd' || *format == 'i') {
-                int num = va_arg(args, int);
-                printf("%d", num);
-                count++;
-            } else if (*format == '%') {
-                putchar('%');
-                count++;
-            } else {
-                // Unsupported format specifier, just print it as is
-                putchar('%');
-                putchar(*format);
-                count += 2;
-            }
-        } else {
-            putchar(*format);
-            count++;
-        }
-        format++;
-    }
+	va_start(list, format);
 
-    va_end(args);
-    return count;
+	for (h = 0; format && format[h] != '\0'; h++)
+	{
+		if (format[h] != '%')
+		{
+			buffer[buff_ind++] = format[h];
+			if (buff_ind == BUFF_SIZE)
+				print_buffer(buffer, &buff_ind);
+			/* write(1, &format[h], 1);*/
+			printed_chars++;
+		}
+		else
+		{
+			print_buffer(buffer, &buff_ind);
+			flags = get_flags(format, &h);
+			width = get_width(format, &h, list);
+			precision = get_precision(format, &h, list);
+			size = get_size(format, &h);
+			++h;
+			printed = handle_print(format, &h, list, buffer,
+				flags, width, precision, size);
+			if (printed == -1)
+				return (-1);
+			printed_chars += printed;
+		}
+	}
+
+	print_buffer(buffer, &buff_ind);
+
+	va_end(list);
+
+	return (printed_chars);
 }
 
-int main() {
-    int n = _printf("Hello, %s! The answer is %d.\n", "world", 42);
-    printf("Character count: %d\n", n);
-    return 0;
+/**
+ * print_buffer - Prints the buff content
+ * @buffer: Array of chars and buffer
+ * @buff_ind: Index at where to edit or add next char, represents the large.
+ */
+void print_buffer(char buffer[], int *buff_ind)
+{
+	if (*buff_ind > 0)
+		write(1, &buffer[0], *buff_ind);
+
+	*buff_ind = 0;
 }
